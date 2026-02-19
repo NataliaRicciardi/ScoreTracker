@@ -1,10 +1,6 @@
 #include "GameSession.h"
 
-GameSession::GameSession(std::string t, int s) : gameTitle(t), score(s) {}
-
-std::string GameSession::getTitle() {
-	return gameTitle;
-}
+GameSession::GameSession(int s) : score(s) {}
 
 int GameSession::getScore() {
 	return score;

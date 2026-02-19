@@ -1,12 +1,14 @@
 #pragma once
 
+#include "GameSession.h"
+
 #include <string>
+#include <vector>
 
 class Player {
 private: 
 	std::string name;
-	int totalScore;
-	int gamesPlayed;
+	std::vector<GameSession> gamesPlayed;
 
 public:
 	Player(std::string n);
