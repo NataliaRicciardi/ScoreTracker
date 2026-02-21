@@ -16,5 +16,7 @@ public:
 	void displayAllPlayers();
 	void removeAllPlayers();
 	void showHighestScorer();
+	void savePlayers();
+	void loadPlayers();
 };
 

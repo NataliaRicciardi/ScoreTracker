@@ -6,6 +6,8 @@ int main() {
 
     std::cout << "------------------- Arcade Manager -------------------\n\n";
 
+    manager.loadPlayers();
+    
     bool running = true;
     bool error = false;
     std::string input;
@@ -57,8 +59,8 @@ int main() {
                 std::cout << "Enter Player Name: ";
                 std::getline(std::cin >> std::ws, name);
 
-                error = false;
                 do {
+                    error = false;
                     std::cout << "Enter Player Score: ";
                     std::cin >> score;
                     try {
@@ -87,6 +89,7 @@ int main() {
                 break;
 
             case 7:
+                manager.savePlayers();
                 running = false;
                 break;
         }

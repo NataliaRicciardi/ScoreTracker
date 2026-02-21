@@ -37,3 +37,7 @@ int Player::getTotalScore() {
 void Player::displayInfo() {
 	std::cout << std::format("Name: {}\nTotal Score: {}\nGames Played: {}\nAverage Score: {}\n\n", name, getTotalScore(), gamesPlayed.size(), getAverageScore());
 }
+
+std::vector<GameSession> Player::getGameSessions() {
+	return gamesPlayed;
+}

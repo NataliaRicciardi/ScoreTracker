@@ -4,6 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <cctype>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
 
 static void toUpper(std::string& input) {
 	for (auto& c : input) {
@@ -81,6 +84,10 @@ void ArcadeManager::removePlayer(std::string name) {
 void ArcadeManager::recordScore(std::string name, int score) {
 	toUpper(name);
 	
+	if (score <= 0) {
+		std::cout << "Invalid Score: Zero or Negative.\n";
+	}
+	
 	for (auto& player : players) {
 		if (player.getName() == name) {
 			player.addScore(score);
@@ -145,4 +152,130 @@ void ArcadeManager::showHighestScorer() {
 	}
 
 	std::cout << "Highest score is " << best.getTotalScore() << " by player " << best.getName() << "!\n";
+}
+
+void ArcadeManager::savePlayers() {
+	std::ofstream file("savedata/playerSave.txt");
+	if (file.is_open()) {
+
+		file << "Name" << "," << "Score" << "\n";
+		
+		for (auto& player : players) {
+			
+			std::vector<GameSession> sessions = player.getGameSessions();
+
+			if (sessions.size() == 0) {
+				file << player.getName() << "," << 0;
+				continue;
+			}
+			
+			for (auto& session : sessions) {
+				file << player.getName() << "," << session.getScore() << "\n";
+			}
+		}
+
+		file.close();
+
+		std::cout << "Scores Saved Successfully!\n";
+	}
+	else {
+		std::cout << "Opening file failed.\n";
+	}
+}
+
+void ArcadeManager::loadPlayers() {
+	bool load;
+	std::string input;
+	bool invalid;
+
+	do {
+		invalid = false;
+		std::cout << "Do you want to load your previous session? (yes or no): ";
+		std::cin >> input;
+
+		int response = yesOrNo(input);
+
+		if (response == 1) {
+			std::cout << "Previous session will be overwrote when you choose 'exit'.\n";
+			return;
+		}
+		else if (response == 2) {
+			std::cout << "Previous session loading... YOU NEED TO \"EXIT\" TO SAVE YOUR CHANGES!\n";
+			load = true;
+		}
+		else {
+			std::cout << "Invalid Input.\n";
+			invalid = true;
+		}
+
+	} while (invalid);
+
+	try {
+		namespace fs = std::filesystem;
+		if (!fs::exists("savedata/playerSave.txt") || fs::is_empty("savedata/playerSave.txt")) {
+			std::cout << "There is no info from a previous session to load!\n";
+			return;
+		}
+	}
+	catch (...) {
+		std::cout << "There was an error with the file.";
+		return;
+	}
+
+	
+	if (load) {
+		std::ifstream file("savedata/playerSave.txt"); // open for read
+		
+		if (!file.is_open()) {
+			std::cout << "Opening file failed.\n";
+			return;
+		}
+		
+		std::string line;
+
+		// skip header
+		std::getline(file, line);
+
+		while (std::getline(file, line)) {
+			std::stringstream ss(line); // for splitting
+			std::string name;
+			std::string scoreStr;
+			int score;
+
+			bool createPlayer = true;
+
+			if (std::getline(ss, name, ',') && std::getline(ss, scoreStr, ',')) {
+				try {
+					score = stoi(scoreStr);
+				}
+				catch (...) {
+					std::cout << "Invalid score for player (CSV)" << name << "\n";
+					continue;
+				}
+				
+				createPlayer = true;
+
+				for (auto & player : players) {
+					if (player.getName() == name) {
+						createPlayer = false;
+						
+						if (score != 0) player.addScore(score);
+						
+						continue;
+					}
+				}
+
+				if (createPlayer) {
+					Player newP(name);
+
+					if (score != 0) newP.addScore(score);
+
+					players.push_back(newP);
+				}
+
+			}
+		}
+
+		file.close();
+	}
 }
