@@ -10,7 +10,7 @@
 
 static void toUpper(std::string& input) {
 	for (auto& c : input) {
-		c = std::toupper(c);
+		c = std::toupper(static_cast<unsigned char>(c));
 	}
 }
 
@@ -86,6 +86,7 @@ void ArcadeManager::recordScore(std::string name, int score) {
 	
 	if (score <= 0) {
 		std::cout << "Invalid Score: Zero or Negative.\n";
+		return;
 	}
 	
 	for (auto& player : players) {
@@ -143,15 +144,17 @@ void ArcadeManager::showHighestScorer() {
 		return;
 	}
 
-	Player best = players[0];
+	// refactor for less copying
+
+	Player* best = &players[0];
 
 	for (auto& player : players) {
-		if (player.getTotalScore() > best.getTotalScore()) {
-			best = player;
+		if (player.getTotalScore() > best->getTotalScore()) {
+			best = &player;
 		}
 	}
 
-	std::cout << "Highest score is " << best.getTotalScore() << " by player " << best.getName() << "!\n";
+	std::cout << "Highest score is " << best->getTotalScore() << " by player " << best->getName() << "!\n";
 }
 
 void ArcadeManager::savePlayers() {
@@ -165,7 +168,7 @@ void ArcadeManager::savePlayers() {
 			std::vector<GameSession> sessions = player.getGameSessions();
 
 			if (sessions.size() == 0) {
-				file << player.getName() << "," << 0;
+				file << player.getName() << "," << 0 << "\n";
 				continue;
 			}
 			
@@ -254,6 +257,8 @@ void ArcadeManager::loadPlayers() {
 				}
 				
 				createPlayer = true;
+
+				toUpper(name);
 
 				for (auto & player : players) {
 					if (player.getName() == name) {

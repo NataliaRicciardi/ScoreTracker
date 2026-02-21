@@ -18,6 +18,6 @@ public:
 	int getAverageScore();
 	int getTotalScore();
 	void displayInfo();
-	std::vector<GameSession> getGameSessions();
+	std::vector<GameSession>& getGameSessions();
 };
 
