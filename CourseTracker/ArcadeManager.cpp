@@ -2,11 +2,11 @@
 #include "Player.h"
 
 #include <iostream>
-#include <vector>
 #include <cctype>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <unordered_map>
 
 static void toUpper(std::string& input) {
 	for (auto& c : input) {
@@ -31,15 +31,12 @@ static int yesOrNo(std::string& input) {
 void ArcadeManager::addPlayer(std::string name) {
 	toUpper(name);
 	
-	for (auto& player : players) {
-		if (player.getName() == name) {
-			std::cout << "A player with this name already exists.\n";
-			return;
-		}
+	if (players.contains(name)) {
+		std::cout << "A player with this name already exists.\n";
+		return;
 	}
 
-	Player newP(name);
-	players.push_back(newP);
+	players.emplace(name, Player(name));
 	std::cout << "New Player Created!\n";
 }
 
@@ -48,37 +45,38 @@ void ArcadeManager::removePlayer(std::string name) {
 	bool invalid;
 	
 	toUpper(name);
-	for (int i = 0; i < players.size(); i++) {
-		if (players[i].getName() == name) {
 
-			do {
-				invalid = false;
-				std::cout << "Are you sure you want to remove this player? (yes to remove, no to cancel): ";
-				std::cin >> input;
+	if (players.contains(name)) {
+		do {
+			invalid = false;
+			std::cout << "Are you sure you want to remove this player? (yes to remove, no to cancel): ";
+			std::cin >> input;
 
-				int response = yesOrNo(input);
+			int response = yesOrNo(input);
 
-				if (response == 1) {
-					std::cout << "Player removal canceled.\n";
-					return;
-				}
-				else if (response == 2) {
-					continue;
-				}
-				else {
-					std::cout << "Invalid Input.\n";
-					invalid = true;
-				}
-			} while (invalid);
+			if (response == 1) {
+				std::cout << "Player removal canceled.\n";
+				return;
+			}
+			else if (response == 2) {
+				continue;
+			}
+			else {
+				std::cout << "Invalid Input.\n";
+				invalid = true;
+			}
+		} while (invalid);
 
 
-			players.erase(players.begin() + i);
-			std::cout << "Player erased successfully.\n";
-			return;
-		}
+		players.erase(name);
+		std::cout << "Player erased successfully.\n";
+		return;
+	}
+	else {
+		std::cout << "Player not found.\n";
+		return;
 	}
 
-	std::cout << "Player not found.\n";
 }
 
 void ArcadeManager::recordScore(std::string name, int score) {
@@ -89,25 +87,26 @@ void ArcadeManager::recordScore(std::string name, int score) {
 		return;
 	}
 	
-	for (auto& player : players) {
-		if (player.getName() == name) {
-			player.addScore(score);
-			std::cout << "Score Added Successfully!\n";
-			return;
-		}
+	auto it = players.find(name);
+
+	if (it != players.end()) {
+		it->second.addScore(score);
+		std::cout << "Score Added Successfully!\n";
 	}
-	
-	std::cout << "Player not found.\n";
+	else {
+		std::cout << "Player not found.\n";
+		return;
+	}
 }
 
 void ArcadeManager::displayAllPlayers() {
-	if (players.size() == 0) {
+	if (players.empty()) {
 		std::cout << "There are no players yet!\n";
 		return;
 	}
 
-	for (auto& player : players) {
-		player.displayInfo();
+	for (auto& pair : players) {
+		pair.second.displayInfo();
 	}
 }
 
@@ -144,17 +143,16 @@ void ArcadeManager::showHighestScorer() {
 		return;
 	}
 
-	// refactor for less copying
+	auto it = players.begin();
+	auto* value = &it->second;
 
-	Player* best = &players[0];
-
-	for (auto& player : players) {
-		if (player.getTotalScore() > best->getTotalScore()) {
-			best = &player;
+	for (auto& pair : players) {
+		if (pair.second.getTotalScore() > value->getTotalScore()) {
+			value = &pair.second;
 		}
 	}
 
-	std::cout << "Highest score is " << best->getTotalScore() << " by player " << best->getName() << "!\n";
+	std::cout << "Highest score is " << value->getTotalScore() << " by player " << value->getName() << "!\n";
 }
 
 void ArcadeManager::savePlayers() {
@@ -163,17 +161,17 @@ void ArcadeManager::savePlayers() {
 
 		file << "Name" << "," << "Score" << "\n";
 		
-		for (auto& player : players) {
+		for (auto& pair : players) {
 			
-			std::vector<GameSession> sessions = player.getGameSessions();
+			std::vector<GameSession> sessions = pair.second.getGameSessions();
 
 			if (sessions.size() == 0) {
-				file << player.getName() << "," << 0 << "\n";
+				file << pair.second.getName() << ",null\n";
 				continue;
 			}
 			
 			for (auto& session : sessions) {
-				file << player.getName() << "," << session.getScore() << "\n";
+				file << pair.second.getName() << "," << session.getScore() << "\n";
 			}
 		}
 
@@ -187,7 +185,7 @@ void ArcadeManager::savePlayers() {
 }
 
 void ArcadeManager::loadPlayers() {
-	bool load;
+	bool load = false;
 	std::string input;
 	bool invalid;
 
@@ -245,37 +243,39 @@ void ArcadeManager::loadPlayers() {
 			std::string scoreStr;
 			int score;
 
-			bool createPlayer = true;
 
 			if (std::getline(ss, name, ',') && std::getline(ss, scoreStr, ',')) {
-				try {
-					score = stoi(scoreStr);
-				}
-				catch (...) {
-					std::cout << "Invalid score for player (CSV)" << name << "\n";
-					continue;
-				}
 				
-				createPlayer = true;
-
 				toUpper(name);
 
-				for (auto & player : players) {
-					if (player.getName() == name) {
-						createPlayer = false;
-						
-						if (score != 0) player.addScore(score);
-						
+				if (scoreStr != "null") {
+					try {
+						score = stoi(scoreStr);
+					}
+					catch (...) {
+						std::cout << "Invalid score for player (CSV)" << name << "\n";
 						continue;
 					}
+
+					auto it = players.find(name);
+
+					if (it != players.end()) {
+						it->second.addScore(score);
+					}
+					else {
+						Player newP(name);
+
+						newP.addScore(score);
+
+						players.emplace(name, newP);
+					}
 				}
+				else {
+					auto it = players.find(name);
 
-				if (createPlayer) {
-					Player newP(name);
-
-					if (score != 0) newP.addScore(score);
-
-					players.push_back(newP);
+					if (it == players.end()) {
+						players.emplace(name, Player(name));
+					}
 				}
 
 			}

@@ -2,12 +2,12 @@
 
 #include "Player.h"
 
-#include <vector>
+#include <unordered_map>
 #include <string>
 
 class ArcadeManager {
 private:
-	std::vector<Player> players;
+	std::unordered_map<std::string, Player> players;
 
 public:
 	void addPlayer(std::string name);
