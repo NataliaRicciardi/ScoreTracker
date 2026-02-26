@@ -13,7 +13,7 @@ int main() {
     std::string input;
     int choice;
     while (running) {
-        std::cout << "\n1. Add Player\n2. Remove a Player\n3. Record Score\n4. Show Players\n5. Remove All Players\n6. Show Highest Score\n7. Exit\n";
+        std::cout << "\n1. Add Player\n2. Remove a Player\n3. Record Score\n4. Show Players\n5. Remove All Players\n6. Show Highest Scores\n7. Exit\n";
         
         do {
             error = false;
@@ -40,6 +40,10 @@ int main() {
         std::string name;
         std::string score;
         int scoreI;
+        std::string gameTitle;
+        std::string durationS;
+        int durationI;
+
         switch (choice) {
             case 1:
                 std::cout << "Enter Player Name: ";
@@ -59,20 +63,46 @@ int main() {
                 std::cout << "Enter Player Name: ";
                 std::getline(std::cin >> std::ws, name);
 
+                std::cout << "Enter Game Title: ";
+                std::getline(std::cin >> std::ws, gameTitle);
+
                 do {
                     error = false;
                     std::cout << "Enter Player Score: ";
                     std::cin >> score;
                     try {
                         scoreI = stoi(score);
+
+                        if (scoreI < 0) {
+                            std::cout << "Invalid Input: Zero or Negative.\n";
+                            error = true;
+                        }
                     }
-                    catch (const std::exception& e) {
-                        std::cout << "Invalid Input. Try Again.\n";
+                    catch (const std::exception&) {
+                        std::cout << "Invalid Score Input. Try Again.\n";
                         error = true;
                     }
                 } while (error);
 
-                manager.recordScore(name, scoreI);
+                do {
+                    error = false;
+                    std::cout << "Enter Duration (minutes): ";
+                    std::cin >> durationS;
+                    try {
+                        durationI = stoi(durationS);
+
+                        if (durationI <= 0) {
+                            std::cout << "Invalid Input: Zero or Negative.\n";
+                            error = true;
+                        }
+                    }
+                    catch (const std::exception&) {
+                        std::cout << "Invalid Duration Input. Try Again\n";
+                        error = true;
+                    }
+                } while (error);
+
+                manager.recordScore(name, scoreI, gameTitle, durationI);
                 break;
 
 

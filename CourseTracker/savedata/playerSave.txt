@@ -1,4 +1,5 @@
-Name,Score
-NAT,0
-NAT,500
-DUM,null
+Name,Score,Title,Duration
+NAT,400,TETRIS,30
+NAT,600,TETRIS,2
+TEE,6000,TETRIS,4
+TEE,3000,PACMAN,3

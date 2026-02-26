@@ -7,6 +7,7 @@
 #include <sstream>
 #include <filesystem>
 #include <unordered_map>
+#include <format>
 
 static void toUpper(std::string& input) {
 	for (auto& c : input) {
@@ -79,18 +80,14 @@ void ArcadeManager::removePlayer(std::string name) {
 
 }
 
-void ArcadeManager::recordScore(std::string name, int score) {
+void ArcadeManager::recordScore(std::string name, int score, std::string title, int duration) {
 	toUpper(name);
-	
-	if (score <= 0) {
-		std::cout << "Invalid Score: Zero or Negative.\n";
-		return;
-	}
+	toUpper(title);
 	
 	auto it = players.find(name);
 
 	if (it != players.end()) {
-		it->second.addScore(score);
+		it->second.addScore(score, title, duration);
 		std::cout << "Score Added Successfully!\n";
 	}
 	else {
@@ -139,27 +136,47 @@ void ArcadeManager::removeAllPlayers() {
 
 void ArcadeManager::showHighestScorer() {
 	if (players.empty()) {
-		std::cout << "There is no highest score yet!\n";
+		std::cout << "There are no players yet!\n";
 		return;
 	}
-
-	auto it = players.begin();
-	auto* value = &it->second;
-
+	
+	// gamename, playername, score
+	std::map<std::string, std::pair<std::string, int>> allHighest;
+	
 	for (auto& pair : players) {
-		if (pair.second.getTotalScore() > value->getTotalScore()) {
-			value = &pair.second;
+		// gamename, score
+		std::map<std::string, int> highestScores = pair.second.getHighestScores(); // get each player's highest scores
+
+		for (auto& score : highestScores) { //iterate over the player's scores and check if any of theirs are greater than pre-saved values
+			auto it = allHighest.find(score.first);
+
+			if (it != allHighest.end()) {
+				if (it->second.second < score.second) {
+					it->second.first = pair.first;
+					it->second.second = score.second;
+				}
+			}
+			else {
+				allHighest.emplace(score.first, std::make_pair(pair.first, score.second));
+			}
 		}
 	}
 
-	std::cout << "Highest score is " << value->getTotalScore() << " by player " << value->getName() << "!\n";
+	if (allHighest.empty()) {
+		std::cout << "There are no saved scores yet!\n";
+		return;
+	}
+
+	for (auto& score : allHighest) {
+		std::cout << std::format("\nHighest for {}: {} got a score of {}!\n", score.first, score.second.first, score.second.second);
+	}
 }
 
 void ArcadeManager::savePlayers() {
 	std::ofstream file("savedata/playerSave.txt");
 	if (file.is_open()) {
 
-		file << "Name" << "," << "Score" << "\n";
+		file << "Name," << "Score" << "," << "Title" << "," << "Duration" << "\n";
 		
 		for (auto& pair : players) {
 			
@@ -171,7 +188,7 @@ void ArcadeManager::savePlayers() {
 			}
 			
 			for (auto& session : sessions) {
-				file << pair.second.getName() << "," << session.getScore() << "\n";
+				file << pair.second.getName() << "," << session.getScore() << "," << session.getGameTitle() << "," << session.getDuration() << "\n";
 			}
 		}
 
@@ -242,6 +259,9 @@ void ArcadeManager::loadPlayers() {
 			std::string name;
 			std::string scoreStr;
 			int score;
+			std::string title;
+			std::string durationStr;
+			int duration;
 
 
 			if (std::getline(ss, name, ',') && std::getline(ss, scoreStr, ',')) {
@@ -249,8 +269,13 @@ void ArcadeManager::loadPlayers() {
 				toUpper(name);
 
 				if (scoreStr != "null") {
+					
+					std::getline(ss, title, ',');
+					std::getline(ss, durationStr, ',');
+					
 					try {
 						score = stoi(scoreStr);
+						duration = stoi(durationStr);
 					}
 					catch (...) {
 						std::cout << "Invalid score for player (CSV)" << name << "\n";
@@ -260,12 +285,12 @@ void ArcadeManager::loadPlayers() {
 					auto it = players.find(name);
 
 					if (it != players.end()) {
-						it->second.addScore(score);
+						it->second.addScore(score, title, duration);
 					}
 					else {
 						Player newP(name);
 
-						newP.addScore(score);
+						newP.addScore(score, title, duration);
 
 						players.emplace(name, newP);
 					}
