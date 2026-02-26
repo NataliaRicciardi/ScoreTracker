@@ -13,7 +13,8 @@ int main() {
     std::string input;
     int choice;
     while (running) {
-        std::cout << "\n1. Add Player\n2. Remove a Player\n3. Record Score\n4. Show Players\n5. Remove All Players\n6. Show Highest Scores\n7. Exit\n";
+        std::cout << "\n1. Add Player\n2. Remove a Player\n3. Record Score\n4. Show Players\n5. Remove All Players\n6. Show Highest Scores\n" << 
+            "7. Show Player Statistics\n8. Game Leaderboards\n9. Most Active Player\n10. Total Playtime per Player\n11. Most Played Game\n12. Exit\n";
         
         do {
             error = false;
@@ -23,7 +24,7 @@ int main() {
             try {
                 choice = std::stoi(input);
 
-                if (choice > 7 || choice < 1) {
+                if (choice > 12 || choice < 1) {
                     throw (choice);
                 }
             }
@@ -118,7 +119,27 @@ int main() {
                 manager.showHighestScorer();
                 break;
 
-            case 7:
+            case 7: 
+                // show player stats
+                //total games played, total score per game, average score per game, highest score per game, total time played
+
+            case 8: 
+                // Show leaderboard for a game
+                // rank 1, rank 2, ... highest scores by title
+
+            case 9: 
+                // Most active player
+                // by most sessions played
+
+            case 10: 
+                // total playtime
+                // per player
+
+            case 11: 
+                // Most played game
+                // compare sessions per game title across all players
+
+            case 12:
                 manager.savePlayers();
                 running = false;
                 break;
