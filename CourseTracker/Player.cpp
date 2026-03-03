@@ -99,3 +99,11 @@ void Player::displayInfo() {
 std::vector<GameSession>& Player::getGameSessions() {
 	return gamesPlayed;
 }
+
+int Player::totalTime() {
+	return std::accumulate(gamesPlayed.begin(), gamesPlayed.end(), 0, 
+		[](int sum, GameSession& game) {
+			return sum + game.getDuration();
+		}
+	);
+}

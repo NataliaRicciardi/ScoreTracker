@@ -21,5 +21,6 @@ public:
 	void displayInfo();
 	std::map<std::string, int> getHighestScores();
 	std::vector<GameSession>& getGameSessions();
+	int totalTime();
 };
 

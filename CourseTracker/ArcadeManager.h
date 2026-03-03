@@ -18,5 +18,10 @@ public:
 	void showHighestScorer();
 	void savePlayers();
 	void loadPlayers();
+	void playerStats(std::string name); // playr name
+	void gameBoard(std::string title); // game title
+	void mostActivePlayer();
+	void totalPlaytime(std::string name);
+	void popularGame();
 };
 

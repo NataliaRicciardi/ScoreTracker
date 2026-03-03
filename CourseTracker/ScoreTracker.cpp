@@ -120,22 +120,43 @@ int main() {
                 break;
 
             case 7: 
-                // show player stats
+                std::cout << "Enter Player Name: ";
+                std::getline(std::cin >> std::ws, name);
+                
+                manager.playerStats(name);
+                break;
+
                 //total games played, total score per game, average score per game, highest score per game, total time played
 
             case 8: 
-                // Show leaderboard for a game
+                std::cout << "Enter Game Title: ";
+                std::getline(std::cin >> std::ws, gameTitle);
+                
+                manager.gameBoard(gameTitle);
+                break;
+                
                 // rank 1, rank 2, ... highest scores by title
 
             case 9: 
-                // Most active player
+                manager.mostActivePlayer();
+                break;
+                
                 // by most sessions played
 
             case 10: 
+                std::cout << "Enter Player Name: ";
+                std::getline(std::cin >> std::ws, name);
+                
+                manager.totalPlaytime(name);
+                break;
+                
                 // total playtime
                 // per player
 
             case 11: 
+                manager.popularGame();
+                break;
+                
                 // Most played game
                 // compare sessions per game title across all players
 

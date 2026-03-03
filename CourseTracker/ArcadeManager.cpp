@@ -309,3 +309,106 @@ void ArcadeManager::loadPlayers() {
 		file.close();
 	}
 }
+
+void ArcadeManager::playerStats(std::string name) {
+	if (players.empty()) {
+		std::cout << "There are no players yet!\n";
+		return;
+	}
+
+	toUpper(name);
+
+	auto it = players.find(name);
+	if (it != players.end()) {
+		// total games played
+		std::cout << "Total games played: " << it->second.getGameSessions().size() << "\n";
+
+		// total game scores
+		std::map<std::string, std::pair<int, int>> totals = it->second.getTotalScore();
+
+		std::cout << "Total Game Scores: \n";
+		for (auto& total : totals) {
+			std::cout << std::format("    {}: {}\n", total.first, total.second.first);
+		}
+
+		// average game scores
+		std::map<std::string, float> averages = it->second.getAverageScore();
+		
+		std::cout << "Average Game Scores: \n";
+		for (auto& average : averages) {
+			std::cout << std::format("    {}: {}\n", average.first, average.second);
+		}
+
+		// highest game scores
+		std::map<std::string, int> scores = it->second.getHighestScores();
+
+		std::cout << "Highest Game Scores: \n";
+		for (auto& score : scores) {
+			std::cout << std::format("    {}: {}\n", score.first, score.second);
+		}
+
+		// total time played
+		std::cout << std::format("Total Time Played: {} minutes\n", it->second.totalTime());
+
+	}
+	else {
+		std::cout << "Could not find player " << name << ".\n";
+		return;
+	}
+
+}
+
+void ArcadeManager::gameBoard(std::string title) {
+	if (players.empty()) {
+		std::cout << "There are no players yet! Add some players and games to make a leaderboard!\n";
+		return;
+	}
+
+	toUpper(title);
+
+	// playername, score for ordering highest
+	std::vector<std::pair<std::string, int>> leaderboard;
+	
+	for (auto& player : players) {
+		// gamename, score
+		std::map<std::string, int> highestScores = player.second.getHighestScores();
+
+		for (auto& score : highestScores) {
+
+			if (score.first == title) { // only add to leaderboard if the game title is right
+				leaderboard.push_back({ player.first, score.second });
+			}
+		}
+	}
+
+	if (leaderboard.empty()) {
+		std::cout << "There are no scores yet for this game! \n";
+		return;
+	}
+	
+	
+	// sort vector leaderboard by the score
+	std::sort(leaderboard.begin(), leaderboard.end(),
+		[](auto& a, auto& b) {
+			return a.second > b.second;
+		}
+	);
+
+	int index = 1;
+	for (auto& score : leaderboard) {
+		std::cout << std::format("\nRank {}: {} {}\n", index, score.first, score.second);
+		index++;
+	}
+}
+
+void ArcadeManager::mostActivePlayer() {
+
+}
+
+void ArcadeManager::totalPlaytime(std::string name) {
+
+}
+
+void ArcadeManager::popularGame() {
+
+}
