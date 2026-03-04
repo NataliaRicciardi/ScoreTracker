@@ -402,6 +402,90 @@ void ArcadeManager::gameBoard(std::string title) {
 }
 
 void ArcadeManager::mostActivePlayer() {
+	if (players.empty()) {
+		std::cout << "No players yet!\n";
+	}
+	
+	// playernames, value (more than one playername if they are equal stats)
+	std::pair<std::vector<std::string>, int> mostGames;
+	std::pair<std::vector<std::string>, int> longTime;
+	bool init = false;
+
+	for (auto& pair : players) {
+		int numsessions = pair.second.getGameSessions().size();
+		
+		if (numsessions > mostGames.second) {
+			
+			mostGames.first.clear(); // empty list if numgames is bigger
+			mostGames.first.push_back(pair.first);
+			mostGames.second = numsessions;
+
+			init = true;
+		}
+		else if (numsessions == mostGames.second) {
+			mostGames.first.push_back(pair.first); // add to list if games is equal
+		}
+
+		int timeplayed = pair.second.totalTime();
+
+		if (timeplayed > longTime.second) {
+			
+			longTime.first.clear();
+			longTime.first.push_back(pair.first);
+			longTime.second = timeplayed;
+
+			init = true;
+		}
+		else if (timeplayed == longTime.second) {
+			longTime.first.push_back(pair.first); // add to list if timeplayed is equal
+		}
+	}
+	
+	if (init) {
+		std::cout << "\nMost Active by Most Games Played: \n";
+		
+		if (mostGames.first.size() == 1) {
+			std::cout << std::format("    Player {} with {} total games played!\n", mostGames.first[0], mostGames.second);
+		}
+		else {
+			for (int i = 0; i < mostGames.first.size(); i++) {
+				if (i == 0) {
+					std::cout << "    Player " << mostGames.first[i];
+				}
+				else if (i > 0 && i < mostGames.first.size() - 1) {
+					std::cout << ", Player " << mostGames.first[i];
+				}
+				else {
+					std::cout << " and Player " << mostGames.first[i];
+				}
+			}
+
+			std::cout << std::format(" with {} total games played!\n", mostGames.second);
+		}
+		
+		std::cout << "\nMost Active by Longest Total Time Played: \n";
+		
+		if (longTime.first.size() == 1) {
+			std::cout << std::format("    Player {} with {} total minutes played!\n", longTime.first[0], longTime.second);
+		}
+		else {
+			for (int i = 0; i < longTime.first.size(); i++) {
+				if (i == 0) {
+					std::cout << "    Player " << longTime.first[i];
+				}
+				else if (i > 0 && i < longTime.first.size() - 1) {
+					std::cout << ", Player " << longTime.first[i];
+				}
+				else {
+					std::cout << " and Player " << longTime.first[i];
+				}
+			}
+			std::cout << std::format(" with {} total minutes played!\n", longTime.second);
+		}
+	}
+	else {
+		std::cout << "No sessions found!\n";
+	}
 
 }
 

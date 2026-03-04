@@ -141,7 +141,7 @@ int main() {
                 manager.mostActivePlayer();
                 break;
                 
-                // by most sessions played
+                // by most sessions played and total duration
 
             case 10: 
                 std::cout << "Enter Player Name: ";

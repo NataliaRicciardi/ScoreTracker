@@ -101,6 +101,10 @@ std::vector<GameSession>& Player::getGameSessions() {
 }
 
 int Player::totalTime() {
+	if (gamesPlayed.empty()) {
+		return 0;
+	}
+	
 	return std::accumulate(gamesPlayed.begin(), gamesPlayed.end(), 0, 
 		[](int sum, GameSession& game) {
 			return sum + game.getDuration();
