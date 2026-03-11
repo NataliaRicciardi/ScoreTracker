@@ -403,7 +403,7 @@ void ArcadeManager::gameBoard(std::string title) {
 
 void ArcadeManager::mostActivePlayer() {
 	if (players.empty()) {
-		std::cout << "No players yet!\n";
+		std::cout << "There are no players yet!\n";
 	}
 	
 	// playernames, value (more than one playername if they are equal stats)
@@ -490,9 +490,87 @@ void ArcadeManager::mostActivePlayer() {
 }
 
 void ArcadeManager::totalPlaytime(std::string name) {
+	if (players.empty()) {
+		std::cout << "There are no players yet!\n";
+		return;
+	}
+	
+	toUpper(name);
 
+	auto it = players.find(name);
+
+	if (it != players.end()) {
+		std::cout << std::format("Total Playtime for Player {}: {}\n", name, it->second.totalTime());
+	}
+	else {
+		std::cout << "No player found with this name.\n";
+	}
 }
 
 void ArcadeManager::popularGame() {
+	if (players.empty()) {
+		std::cout << "There are no players yet!\n";
+		return;
+	}
+	
+	// gametitle, count (how many sessions per game)
+	std::map<std::string, int> sessionCount;
 
+	for (auto& pair : players) {
+		std::vector<GameSession>& playerSessions = pair.second.getGameSessions();
+
+		for (auto& session : playerSessions) {
+			
+			auto it = sessionCount.find(session.getGameTitle());
+
+			if (it != sessionCount.end()) {
+				it->second++;
+			}
+			else {
+				sessionCount.emplace(session.getGameTitle(), 1);
+			}
+		}
+	}
+
+	if (sessionCount.empty()) {
+		std::cout << "There are no games recorded yet!\n";
+		return;
+	}
+
+	// pair (gametitle, count) with only the highest count(s)
+	std::vector<std::pair<std::string, int>> highestSession; 
+	highestSession.push_back({ "", 0 });
+	
+	for (auto& game : sessionCount) {
+		if (highestSession[0].second < game.second) {
+			highestSession.clear();
+			highestSession.push_back({ game.first, game.second });
+		}
+		else if (highestSession[0].second == game.second) {
+			highestSession.push_back({ game.first, game.second });
+		}
+	}
+
+	if (highestSession[0].first == "") {
+		std::cout << "Something went wrong.\n";
+		return;
+	}
+	else if (highestSession.size() == 1) {
+		std::cout << std::format("The Most Popular game is {}!\n", highestSession[0].first);
+		return;
+	}
+	else {
+		std::cout << "The Most Popular games are ";
+		for (int i = 0; i < highestSession.size(); i++) {
+			if (i == 0) {
+				std::cout << highestSession[0].first;
+			}
+			else if (i > 0 && i < highestSession.size() - 1) {
+				std::cout << ", " << highestSession[i].first;
+			}
+			else {
+				std::cout << " and " << highestSession[i].first << "!\n";
+			}
+		}
+	}
 }
