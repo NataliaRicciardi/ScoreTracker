@@ -592,23 +592,24 @@ void ArcadeManager::deleteGameSession(std::string name, std::string title) {
 
 	std::vector<GameSession>& playerGames = it->second.getGameSessions();
 
-	std::vector<std::pair<int, GameSession>> titleCorrect; // numbered gamesessions with the title the user input
+	std::vector<int> matchingIndexes; // indexes of matching titles instead of copying gamesessions
 
-	int number = 1; // for gamesession numbers
-	for (auto& session : playerGames) {
-		if (session.getGameTitle() == title) {
-			titleCorrect.push_back({ number++, session });
+	for (int i = 0; i < playerGames.size(); i++) {
+		if (playerGames[i].getGameTitle() == title) {
+			matchingIndexes.push_back(i);
 		}
 	}
 
-	if (titleCorrect.empty()) {
+	if (matchingIndexes.empty()) {
 		std::cout << "No sessions found for this player with title: " << title << "\n";
 		return;
 	}
 
 	std::cout << "\nSessions for Player " << name << ": \n";
-	for (auto& pair : titleCorrect) {
-		std::cout << std::format("{}:\n    Score: {}\n    Duration: {} minutes\n", pair.first, pair.second.getScore(), pair.second.getDuration());
+	for (int i = 0; i < matchingIndexes.size(); i++) {
+		auto& session = playerGames[matchingIndexes[i]];
+
+		std::cout << std::format("{}:\n    Score: {}\n    Duration: {} minutes\n", i + 1, session.getScore(), session.getDuration());
 	}
 
 	bool error = false;
@@ -623,7 +624,7 @@ void ArcadeManager::deleteGameSession(std::string name, std::string title) {
 		try {
 			input = stoi(inputS);
 
-			if (input > titleCorrect[titleCorrect.size() - 1].first || input <= 0) {
+			if (input > matchingIndexes.size() || input <= 0) {
 				std::cout << "Invalid Input: Out of range.\n";
 				error = true;
 			}
@@ -655,17 +656,7 @@ void ArcadeManager::deleteGameSession(std::string name, std::string title) {
 		}
 	} while (error);
 
-	GameSession sessionDel = titleCorrect[input - 1].second;
-	
-	std::string response = it->second.removeScore(sessionDel.getScore(), sessionDel.getGameTitle(), sessionDel.getDuration());
+	playerGames.erase(playerGames.begin() + matchingIndexes[input - 1]); // delete gamesessions using the reference to the actual list
 
-	if (response == "Success") {
-		std::cout << "Successfully Removed Score!\n";
-	}
-	else if (response == "No Scores") {
-		std::cout << "Something went wrong, no scores were found for this player!\n";
-	}
-	else if (response == "Not Found") {
-		std::cout << "Something went wrong, a score matching the one you chose wasn't found!\n";
-	}
+	std::cout << "Session successfully removed!\n";
 }

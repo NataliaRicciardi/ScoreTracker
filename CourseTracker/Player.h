@@ -22,6 +22,5 @@ public:
 	std::map<std::string, int> getHighestScores();
 	std::vector<GameSession>& getGameSessions();
 	int totalTime();
-	std::string removeScore(int score, std::string title, int duration);
 };
 

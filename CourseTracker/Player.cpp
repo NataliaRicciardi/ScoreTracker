@@ -111,19 +111,3 @@ int Player::totalTime() {
 		}
 	);
 }
-
-std::string Player::removeScore(int score, std::string title, int duration) {
-	if (gamesPlayed.empty()) {
-		return "No Scores";
-	}
-
-	for (int i = 0; i < gamesPlayed.size() - 1; i++) {
-		if (gamesPlayed[i].getScore() == score && gamesPlayed[i].getGameTitle() == title && gamesPlayed[i].getDuration() == duration) {
-			gamesPlayed.erase(gamesPlayed.begin() + i);
-
-			return "Success";
-		}
-	}
-
-	return "Not Found";
-}
