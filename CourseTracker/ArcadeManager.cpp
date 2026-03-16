@@ -574,3 +574,98 @@ void ArcadeManager::popularGame() {
 		}
 	}
 }
+
+void ArcadeManager::deleteGameSession(std::string name, std::string title) {
+	if (players.empty()) {
+		std::cout << "There are no players yet!";
+		return;
+	}
+
+	toUpper(name);
+	toUpper(title);
+	
+	auto it = players.find(name);
+	if (it == players.end()) {
+		std::cout << "No player found with this name.\n";
+		return;
+	}
+
+	std::vector<GameSession>& playerGames = it->second.getGameSessions();
+
+	std::vector<std::pair<int, GameSession>> titleCorrect; // numbered gamesessions with the title the user input
+
+	int number = 1; // for gamesession numbers
+	for (auto& session : playerGames) {
+		if (session.getGameTitle() == title) {
+			titleCorrect.push_back({ number++, session });
+		}
+	}
+
+	if (titleCorrect.empty()) {
+		std::cout << "No sessions found for this player with title: " << title << "\n";
+		return;
+	}
+
+	std::cout << "\nSessions for Player " << name << ": \n";
+	for (auto& pair : titleCorrect) {
+		std::cout << std::format("{}:\n    Score: {}\n    Duration: {} minutes\n", pair.first, pair.second.getScore(), pair.second.getDuration());
+	}
+
+	bool error = false;
+	std::string inputS;
+	int input;
+	do {
+		error = false;
+
+		std::cout << "Session number for deletion: ";
+		std::cin >> inputS;
+
+		try {
+			input = stoi(inputS);
+
+			if (input > titleCorrect[titleCorrect.size() - 1].first || input <= 0) {
+				std::cout << "Invalid Input: Out of range.\n";
+				error = true;
+			}
+		}
+		catch (...) {
+			std::cout << "Invalid Input: Not an integer value.\n";
+			error = true;
+		}
+	} while (error);
+
+	std::string answer;
+	do {
+		error = false;
+		std::cout << "Are you sure you want to remove this session? (yes to remove, no to cancel): ";
+		std::cin >> answer;
+
+		int response = yesOrNo(answer);
+
+		if (response == 1) {
+			std::cout << "Session removal canceled.\n";
+			return;
+		}
+		else if (response == 2) {
+			continue;
+		}
+		else {
+			std::cout << "Invalid Input.\n";
+			error = true;
+		}
+	} while (error);
+
+	GameSession sessionDel = titleCorrect[input - 1].second;
+	
+	std::string response = it->second.removeScore(sessionDel.getScore(), sessionDel.getGameTitle(), sessionDel.getDuration());
+
+	if (response == "Success") {
+		std::cout << "Successfully Removed Score!\n";
+	}
+	else if (response == "No Scores") {
+		std::cout << "Something went wrong, no scores were found for this player!\n";
+	}
+	else if (response == "Not Found") {
+		std::cout << "Something went wrong, a score matching the one you chose wasn't found!\n";
+	}
+}

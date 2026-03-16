@@ -13,8 +13,8 @@ int main() {
     std::string input;
     int choice;
     while (running) {
-        std::cout << "\n1. Add Player\n2. Remove a Player\n3. Record Score\n4. Show Players\n5. Remove All Players\n6. Show Highest Scores\n" << 
-            "7. Show Player Statistics\n8. Game Leaderboards\n9. Most Active Player\n10. Total Playtime per Player\n11. Most Played Game\n12. Exit\n";
+        std::cout << "\n1. Add Player\n2. Remove a Player\n3. Record Score\n4. Remove Score\n5. Show Players\n6. Remove All Players\n7. Show Highest Scores\n" << 
+            "8. Show Player Statistics\n9. Game Leaderboards\n10. Most Active Player\n11. Total Playtime per Player\n12. Most Played Game\n13. Exit\n";
         
         do {
             error = false;
@@ -24,7 +24,7 @@ int main() {
             try {
                 choice = std::stoi(input);
 
-                if (choice > 12 || choice < 1) {
+                if (choice > 13 || choice < 1) {
                     throw (choice);
                 }
             }
@@ -106,20 +106,30 @@ int main() {
                 manager.recordScore(name, scoreI, gameTitle, durationI);
                 break;
 
+            case 4: 
+                std::cout << "Enter Player Name: ";
+                std::getline(std::cin >> std::ws, name);
 
-            case 4:
+                std::cout << "Enter Game Title: ";
+                std::getline(std::cin >> std::ws, gameTitle);
+
+                manager.deleteGameSession(name, gameTitle);
+                break;
+            
+                // remove score by player name and game title, function will search for all results, print them out, and user will choose one to delete
+            case 5:
                 manager.displayAllPlayers();
                 break;
 
-            case 5: 
+            case 6: 
                 manager.removeAllPlayers();
                 break;
 
-            case 6:
+            case 7:
                 manager.showHighestScorer();
                 break;
 
-            case 7: 
+            case 8: 
                 std::cout << "Enter Player Name: ";
                 std::getline(std::cin >> std::ws, name);
                 
@@ -128,7 +138,7 @@ int main() {
 
                 //total games played, total score per game, average score per game, highest score per game, total time played
 
-            case 8: 
+            case 9: 
                 std::cout << "Enter Game Title: ";
                 std::getline(std::cin >> std::ws, gameTitle);
                 
@@ -137,13 +147,13 @@ int main() {
                 
                 // rank 1, rank 2, ... highest scores by title
 
-            case 9: 
+            case 10: 
                 manager.mostActivePlayer();
                 break;
                 
                 // by most sessions played and total duration
 
-            case 10: 
+            case 11: 
                 std::cout << "Enter Player Name: ";
                 std::getline(std::cin >> std::ws, name);
                 
@@ -153,14 +163,14 @@ int main() {
                 // total playtime
                 // per player
 
-            case 11: 
+            case 12: 
                 manager.popularGame();
                 break;
                 
                 // Most played game
                 // compare sessions per game title across all players
 
-            case 12:
+            case 13:
                 manager.savePlayers();
                 running = false;
                 break;

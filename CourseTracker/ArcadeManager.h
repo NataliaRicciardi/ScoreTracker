@@ -23,5 +23,6 @@ public:
 	void mostActivePlayer();
 	void totalPlaytime(std::string name);
 	void popularGame();
+	void deleteGameSession(std::string name, std::string title);
 };
 
